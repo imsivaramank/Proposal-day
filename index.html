@@ -6,77 +6,99 @@
 <title>Kavinci ❤️</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: black;
-  color: white;
-  text-align: center;
-  overflow-x: hidden;
+body{
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background:black;
+    color:white;
+    text-align:center;
+    overflow-y:auto;   /* IMPORTANT */
 }
 
-/* Question screen */
-#question {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+/* Question Screen */
+#question{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
 }
 
-h1 {
-  font-size: 3rem;
-  margin-bottom: 30px;
+h1{
+    font-size:2.5rem;
 }
 
-/* Buttons */
-button {
-  font-size: 22px;
-  padding: 15px 30px;
-  margin: 10px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
+button{
+    padding:15px 30px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+    margin:15px;
+    cursor:pointer;
 }
 
-#yesBtn {
-  background: #ff2e63;
-  color: white;
+#yesBtn{
+    background:#ff4d6d;
+    color:white;
+    font-weight:bold;
+    transform:scale(1.2);
 }
 
-#noBtn {
-  background: gray;
-  color: white;
-  position: absolute;
+#noBtn{
+    background:#444;
+    color:white;
+    position:absolute;
 }
 
-/* Result section */
-#result {
-  display: none;
-  padding: 20px;
+/* Result Screen */
+#result{
+    display:none;
+    padding:40px 20px 80px;
+    position:relative;
+    z-index:2;
 }
 
-.gallery img {
-  width: 280px;
-  margin: 15px;
-  border-radius: 15px;
-  box-shadow: 0 0 15px pink;
+/* Gallery FIX */
+.gallery{
+    display:flex;
+    flex-wrap:wrap;      /* IMPORTANT */
+    justify-content:center;
 }
 
-/* Fireworks canvas */
-#fireworks {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  z-index: 1;
+.gallery img{
+    width:250px;
+    max-width:90%;
+    margin:12px;
+    border-radius:15px;
+    box-shadow:0 0 15px pink;
+    display:block;
 }
 
-.content {
-  position: relative;
-  z-index: 2;
+/* Fireworks Canvas FIX */
+#fireworks{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    pointer-events:none;
+    z-index:0;  /* BEHIND CONTENT */
+}
+
+/* Floating hearts */
+.heart{
+    position:fixed;
+    bottom:-30px;
+    color:red;
+    font-size:20px;
+    animation: float 6s linear infinite;
+    z-index:1;
+}
+
+@keyframes float{
+    0%{transform:translateY(0);opacity:1;}
+    100%{transform:translateY(-110vh);opacity:0;}
 }
 </style>
 </head>
@@ -85,101 +107,104 @@ button {
 
 <canvas id="fireworks"></canvas>
 
-<!-- Question -->
 <div id="question">
-  <h1>Kavinci, Will you be my Valentine? ❤️</h1>
-  <button id="yesBtn" onclick="yesClicked()">YES 💖</button>
-  <button id="noBtn">NO 😜</button>
+    <h1>Kavinci, Will you be my Valentine? ❤️</h1>
+    <button id="yesBtn" onclick="yesClicked()">YES ❤️</button>
+    <button id="noBtn">NO</button>
 </div>
 
-<!-- Result -->
-<div id="result" class="content">
-  <h1>You just made me the happiest man alive ❤️</h1>
+<div id="result">
+    <h1>You just made me the happiest man alive ❤️</h1>
+    <h2>Forever yours, Siva</h2>
 
-  <div class="gallery">
-    <img src="img1.jpg">
-    <img src="img2.jpg">
-    <img src="img3.jpg">
-    <img src="img4.jpg">
-    <img src="img5.jpg">
-    <img src="img6.jpg">
-    <img src="img7.jpg">
-  </div>
-
-  <h2>Forever yours, Siva ❤️</h2>
+    <div class="gallery">
+        <img src="img1.jpg">
+        <img src="img2.jpg">
+        <img src="img3.jpg">
+        <img src="img4.jpg">
+        <img src="img5.jpg">
+        <img src="img6.jpg">
+        <img src="img7.jpg">
+    </div>
 </div>
 
 <script>
-
-/* RUN AWAY NO BUTTON */
+/* NO button run away */
 const noBtn = document.getElementById("noBtn");
-
-noBtn.addEventListener("mouseover", () => {
-  const x = Math.random() * (window.innerWidth - 100);
-  const y = Math.random() * (window.innerHeight - 50);
-  noBtn.style.left = x + "px";
-  noBtn.style.top = y + "px";
+noBtn.addEventListener("mouseover", ()=>{
+    noBtn.style.top = Math.random()*80 + "%";
+    noBtn.style.left = Math.random()*80 + "%";
 });
 
+/* YES click */
+function yesClicked(){
+    document.getElementById("question").style.display="none";
+    document.getElementById("result").style.display="block";
+    startFireworks();
+    startHearts();
+}
 
-/* FIREWORKS CODE */
+/* Fireworks */
 const canvas = document.getElementById("fireworks");
 const ctx = canvas.getContext("2d");
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.onresize = resize;
 
-let particles = [];
+let particles=[];
 
-function createFirework() {
-  const x = Math.random() * canvas.width;
-  const y = Math.random() * canvas.height / 2;
+function createFirework(){
+    const x = Math.random()*canvas.width;
+    const y = Math.random()*canvas.height/2;
 
-  for (let i = 0; i < 80; i++) {
-    particles.push({
-      x,
-      y,
-      vx: (Math.random() - 0.5) * 6,
-      vy: (Math.random() - 0.5) * 6,
-      alpha: 1,
-      color: `hsl(${Math.random() * 360},100%,60%)`
+    for(let i=0;i<80;i++){
+        particles.push({
+            x,y,
+            vx:(Math.random()-0.5)*6,
+            vy:(Math.random()-0.5)*6,
+            alpha:1,
+            color:`hsl(${Math.random()*360},100%,60%)`
+        });
+    }
+}
+
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach((p,i)=>{
+        p.x+=p.vx;
+        p.y+=p.vy;
+        p.alpha-=0.01;
+        ctx.globalAlpha=p.alpha;
+        ctx.fillStyle=p.color;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,2,0,Math.PI*2);
+        ctx.fill();
+        if(p.alpha<=0) particles.splice(i,1);
     });
-  }
+    requestAnimationFrame(animate);
 }
 
-function animate() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach((p, i) => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.alpha -= 0.01;
-
-    ctx.globalAlpha = p.alpha;
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-    ctx.fill();
-
-    if (p.alpha <= 0) particles.splice(i, 1);
-  });
-
-  requestAnimationFrame(animate);
+function startFireworks(){
+    setInterval(createFirework,500);
+    animate();
 }
 
-function startFireworks() {
-  setInterval(createFirework, 500);
-  animate();
+/* Hearts */
+function startHearts(){
+    setInterval(()=>{
+        const heart=document.createElement("div");
+        heart.className="heart";
+        heart.innerHTML="❤️";
+        heart.style.left=Math.random()*100+"vw";
+        heart.style.fontSize=(20+Math.random()*30)+"px";
+        document.body.appendChild(heart);
+        setTimeout(()=>heart.remove(),6000);
+    },400);
 }
-
-
-/* YES CLICK FUNCTION */
-function yesClicked() {
-  document.getElementById("question").style.display = "none";
-  document.getElementById("result").style.display = "block";
-  startFireworks();
-}
-
 </script>
 
 </body>
